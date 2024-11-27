@@ -13,15 +13,15 @@ spring:
           enabled: true
       routes:
         - id: employeeservice
-          uri: lb://employeeservice
+          uri: lb://employeeservice # Load balanced URL
           predicates:
             - Path=/api/v1/employees/**
           filters:
             - name: RequestRateLimiter
               args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
+                redis-rate-limiter.replenishRate: 10 # Number of requests that can be made in a second
+                redis-rate-limiter.burstCapacity: 20 # Maximum number of requests that can be made in a second
+                redis-rate-limiter.requestedTokens: 1 # Number of tokens to be consumed for each request
             - KeyAuthFilter
         - id: bookservice
           uri: lb://bookservice
@@ -37,9 +37,9 @@ spring:
 
 eureka:
   instance:
-    hostname: discoveryserver
+    hostname: localhost
   client:
     service-url:
-      defaultZone: http://discoveryserver:8761/eureka
+      defaultZone: http://localhost:8761/eureka
       register-with-eureka: true
       fetch-registry: true
