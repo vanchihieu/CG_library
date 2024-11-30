@@ -1,5 +1,9 @@
 package com.ltfullstack.bookservice.command.aggregate;
 
+import com.commonservice.command.RollBackStatusBookCommand;
+import com.commonservice.command.UpdateStatusBookCommand;
+import com.commonservice.event.BookRollBackStatusEvent;
+import com.commonservice.event.BookUpdateStatusEvent;
 import com.ltfullstack.bookservice.command.command.CreateBookCommand;
 import com.ltfullstack.bookservice.command.command.DeleteBookCommand;
 import com.ltfullstack.bookservice.command.command.UpdateBookCommand;
@@ -21,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 @Getter
 @Setter
 public class BookAggregate {
+
     @AggregateIdentifier
     private String id;
     private String name;
@@ -47,6 +52,32 @@ public class BookAggregate {
         BookDeletedEvent bookDeletedEvent = new BookDeletedEvent();
         BeanUtils.copyProperties(command,bookDeletedEvent);
         AggregateLifecycle.apply(bookDeletedEvent);
+    }
+
+    @CommandHandler
+    public void handler(UpdateStatusBookCommand command){
+        BookUpdateStatusEvent event = new BookUpdateStatusEvent();
+        BeanUtils.copyProperties(command,event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @CommandHandler
+    public void handler(RollBackStatusBookCommand command){
+        BookRollBackStatusEvent event = new BookRollBackStatusEvent();
+        BeanUtils.copyProperties(command,event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on (BookRollBackStatusEvent event){
+        this.id = event.getBookId();
+        this.isReady = event.getIsReady();
+    }
+
+    @EventSourcingHandler
+    public void on(BookUpdateStatusEvent event){
+        this.id = event.getBookId();
+        this.isReady = event.getIsReady();
     }
 
     @EventSourcingHandler
